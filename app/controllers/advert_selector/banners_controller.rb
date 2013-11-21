@@ -2,6 +2,8 @@ require_dependency "advert_selector/application_controller"
 
 module AdvertSelector
   class BannersController < ApplicationController
+    before_action :set_banner, only: [:show, :edit, :update, :destroy, :update_running_view_count]
+
     # GET /banners
     # GET /banners.json
     def index
@@ -52,13 +54,12 @@ module AdvertSelector
   
     # GET /banners/1/edit
     def edit
-      @banner = Banner.find(params[:id])
     end
   
     # POST /banners
     # POST /banners.json
     def create
-      @banner = Banner.new(params[:banner])
+      @banner = Banner.new(banner_params)
   
       respond_to do |format|
         if @banner.save
@@ -74,10 +75,9 @@ module AdvertSelector
     # PUT /banners/1
     # PUT /banners/1.json
     def update
-      @banner = Banner.find(params[:id])
-  
+
       respond_to do |format|
-        if @banner.update_attributes(params[:banner])
+        if @banner.update_attributes(banner_params)
           format.html { redirect_to @banner, :notice => 'Banner was successfully updated.' }
           format.json { head :no_content }
         else
@@ -89,7 +89,6 @@ module AdvertSelector
 
 
     def update_running_view_count
-      @banner = Banner.find(params[:id])
       if !(@count = params['banner']["running_view_count"]).blank?
         @count = @count.to_i
         Banner.where(:id => @banner.id).update_all(:running_view_count => @count)
@@ -109,7 +108,6 @@ module AdvertSelector
     # DELETE /banners/1
     # DELETE /banners/1.json
     def destroy
-      @banner = Banner.find(params[:id])
       @banner.destroy
   
       respond_to do |format|
@@ -117,6 +115,19 @@ module AdvertSelector
         format.json { head :no_content }
       end
     end
+
+    private
+
+    def set_banner
+      @banner = Banner.find(params[:id])
+    end
+
+    def banner_params
+        params.require(:banner).permit(:comment, :confirmed, :start_time, :end_time,
+                            :frequency, :name, :placement_id, :target_view_count, :priority,
+                            :fast_mode, :helper_items_attributes
+        )
+      end
 
   end
 end
